@@ -165,14 +165,16 @@ projectsEvaluated {
     // because the module POM's file will include a dependency on the plugin Maven artifact.
     // This is due to the Android Gradle Plugin expecting all library subprojects to be published
     // as Maven artifacts.
-    modulePlugins.each { pluginProject ->
-        configurePlugin(pluginProject, moduleProject.property("output-dir"))
-        moduleProject.android.libraryVariants.all { variant ->
-            // Configure the `assembleAar<variantName>` task for each plugin's projects and make
-            // the module's equivalent task depend on the plugin's task.
-            String variantName = variant.name.capitalize()
-            moduleProject.tasks.findByPath("assembleAar$variantName")
-                .dependsOn(pluginProject.tasks.findByPath("assembleAar$variantName"))
-        }
+    modulePlugins.each { pluginProject -> 
+        configurePlugin(pluginProject, moduleProject.property("output-dir")) 
+        moduleProject.android.libraryVariants.all { variant -> 
+            String variantName = variant.name.capitalize() 
+            def task = moduleProject.tasks.findByPath("assembleAar$variantName") 
+            def dependTask = pluginProject.tasks.findByPath("assembleAar$variantName") 
+            if (task != null && dependTask != null) { 
+                task.dependsOn(dependTask) 
+            } 
+        } 
     }
+
 }
